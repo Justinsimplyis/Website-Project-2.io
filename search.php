@@ -44,8 +44,7 @@ if (count($search_results) > 0) {
         echo '</div>';
         echo '</div>';
         echo '<div class="d-flex gap-1">';
-        echo '<a href="profile_view.php?id=' . $user['id'] . '" class="btn btn-sm btn-primary">View</a>';
-        echo '<a href="follow.php?id=' . $user['id'] . '" class="btn btn-sm btn-success">Add</a>';
+        echo '<a href="profile_view.php?id=' . $user['id'] . '" class="btn btn-sm btn-primary">View</a>';        
         echo '<button class="btn btn-sm btn-success sendRequestBtn" data-id="' . $user['id'] . '">Chat</button>';
         echo '</div>';
         echo '</div>';

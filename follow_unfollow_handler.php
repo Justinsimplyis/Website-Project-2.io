@@ -37,11 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
             $stmt->bind_param("ii", $follower_id, $followed_id);
             $stmt->execute();
 
-            // Create a 'follow' notification for the user who was followed.
-            $notif_sql = "INSERT INTO notifications (recipient_id, sender_id, type, is_read) VALUES (?, ?, 'follow', 0)";
-            $stmt_notif = $conn->prepare($notif_sql);
-            $stmt_notif->bind_param("ii", $followed_id, $follower_id);
-            $stmt_notif->execute();
+
         }
     } 
     
@@ -51,9 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         $sql = "DELETE FROM followers WHERE follower_id = ? AND followed_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $follower_id, $followed_id);
-        $stmt->execute();
+        $stmt->execute();        
+            
     }
-
+    
     // 5. Redirect Back to the profile page the user was viewing.
     header("Location: profile_view.php?id=" . $followed_id);
     exit();

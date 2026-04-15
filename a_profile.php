@@ -285,16 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 </ul>
                 <div class="d-flex align-items-center gap-2">                   
 
-                    <!-- NEW: Notifications Dropdown -->
-                    <button class="btn btn-light position-relative" type="button" data-bs-toggle="modal" data-bs-target="#notificationsModal">
-                        <i class="fa fa-bell"></i>
-                        <?php if($unread_count > 0): ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                <?php echo $unread_count; ?>
-                            </span>
-                        <?php endif; ?>
-                    </button>
-
+                   
                     <!-- Profile -->
                     <a href="admin_dashboard.php" class="btn btn-light my-2 my-sm-0"
                         style="font-weight:bolder;color:orange;">
@@ -401,51 +392,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             </form>
         </div>
     </div>
-
-    <!-- NEW: Notifications Modal -->
-    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="notificationsModalLabel">Notifications</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <?php if(count($notifications) > 0): ?>
-                        
-                        <?php foreach($notifications as $row): ?>
-                            
-                            <a href="mark_read.php?id=<?php echo $row['id']; ?>" class="d-block text-decoration-none text-dark">
-                                <div class="p-2 border-bottom <?php echo $row['is_read'] == 0 ? 'bg-light' : ''; ?>">
-                                    <small class="text-muted">
-                                        <?php echo date("M d, H:i", strtotime($row['created_at'])); ?>
-                                    </small><br>
-
-                                    <?php
-                                    // Dynamic message based on type
-                                    if($row['type'] == 'follow'){
-                                        echo "<strong>{$row['sender_name']}</strong> followed you";
-                                    } elseif($row['type'] == 'like'){
-                                        echo "<strong>{$row['sender_name']}</strong> liked your post";
-                                    } elseif($row['type'] == 'profile_update') {
-                                        echo $row['message']; // Custom message for profile update
-                                    } else {
-                                        echo $row['message'];
-                                    }
-                                    ?>
-                                </div>
-                            </a>
-
-                        <?php endforeach; ?>
-
-                    <?php else: ?>
-                        <div class="text-muted text-center p-3">No notifications</div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
     
+
     <!-- Followers Modal -->
     <div class="modal fade" id="followersModal" tabindex="-1">
         <div class="modal-dialog">
@@ -492,8 +440,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                     <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                                 </div>
                                 <div class="d-flex gap-1">
-                                    <a href="profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>
-                                    <a href="unfollow.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-danger">Unfollow</a>
+                                    <a href="profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>                                   
                                 </div>
                             </div>
                         <?php endforeach; ?>

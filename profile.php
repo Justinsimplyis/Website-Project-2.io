@@ -105,12 +105,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     }
     
     // NEW: Create a notification for the profile update
-    $notification_message = "Your profile was successfully updated.";
-    $notif_sql = "INSERT INTO notifications (recipient_id, sender_id, type, message, is_read) VALUES (?, ?, 'profile_update', ?, 0)";
-    $notif_stmt = $conn->prepare($notif_sql);
-    $notif_stmt->bind_param("iis", $user_id, $user_id, $notification_message);
-    $notif_stmt->execute();
-    $notif_stmt->close();
+ $notification_message = "Your profile was successfully updated.";
+ $related_id = $user_id;
+ $related_type = 'profile';
+
+ $notif_sql = "INSERT INTO notifications (recipient_id, sender_id, type, message, is_read, related_id, related_type) 
+              VALUES (?, ?, 'profile_update', ?, 0, ?, ?)";
+ $notif_stmt = $conn->prepare($notif_sql);
+ $notif_stmt->bind_param("iisis", $user_id, $user_id, $notification_message, $related_id, $related_type);
+ $notif_stmt->execute();
+ $notif_stmt->close();
 
     // Refresh profile info after update
     $stmt->execute();
@@ -466,15 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 <ul class="navbar-nav m-auto mt-2 mt-lg-0">
                 </ul>
                 <div class="d-flex align-items-center gap-2">                   
-                    <!-- Notifications -->
-                    <button class="btn btn-light position-relative" type="button" data-bs-toggle="modal" data-bs-target="#notificationsModal">
-                        <i class="fa fa-bell"></i>
-                        <?php if($unread_count > 0): ?>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                <?php echo $unread_count; ?>
-                            </span>
-                        <?php endif; ?>
-                    </button>
+                    
 
                     <!-- Back to Dashboard -->
                     <a href="dashboard.php" class="btn btn-light">
@@ -599,49 +595,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             </div>
         </div>
     </div>
-
-    <!-- Notifications Modal -->
-    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="notificationsModalLabel">
-                        <i class="fa fa-bell"></i> Notifications
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <?php if(count($notifications) > 0): ?>
-                        <?php foreach($notifications as $row): ?>
-                            <a href="mark_read.php?id=<?php echo $row['id']; ?>" class="text-decoration-none">
-                                <div class="notification-item <?php echo $row['is_read'] == 0 ? 'unread' : ''; ?>">
-                                    <small class="text-muted d-block mb-1">
-                                        <i class="fa fa-clock"></i> <?php echo date("M d, H:i", strtotime($row['created_at'])); ?>
-                                    </small>
-                                    <?php
-                                    if($row['type'] == 'follow'){
-                                        echo "<i class='fa fa-user-plus text-info'></i> <strong>{$row['sender_name']}</strong> followed you";
-                                    } elseif($row['type'] == 'like'){
-                                        echo "<i class='fa fa-heart text-danger'></i> <strong>{$row['sender_name']}</strong> liked your post";
-                                    } elseif($row['type'] == 'profile_update') {
-                                        echo "<i class='fa fa-check-circle text-success'></i> {$row['message']}";
-                                    } else {
-                                        echo "<i class='fa fa-info-circle text-primary'></i> {$row['message']}";
-                                    }
-                                    ?>
-                                </div>
-                            </a>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="text-center text-muted p-4">
-                            <i class="fa fa-bell-slash fa-3x mb-3"></i>
-                            <p>No notifications</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <!-- Followers Modal -->
     <div class="modal fade" id="followersModal" tabindex="-1">
@@ -700,9 +653,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                 <div class="d-flex gap-2">
                                     <a href="profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-glass btn-sm">
                                         <i class="fa fa-eye"></i> View
-                                    </a>
-                                    <a href="unfollow.php?id=<?php echo $user['id']; ?>" class="btn btn-glass btn-sm">
-                                        <i class="fa fa-user-times"></i> Unfollow
                                     </a>
                                 </div>
                             </div>

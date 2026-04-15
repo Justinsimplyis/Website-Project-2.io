@@ -97,8 +97,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="mb-2 mt-2">
                 <label for="password"><i 
                   class="fa fa-lock"></i> Password</label>
-                <input type="password" name="password" id="password"
-                  class="form-control" required>
+
+                <div class="input-group">
+                        <input type="password" name="password" id="password" 
+                        class="form-control" required>
+
+                        <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                            <i class="fa fa-eye-slash"></i>
+                            </span>
+                    </div>
             </div>
             <div class="mb-2 mt-3">
                 <button type="submit" 
@@ -119,6 +126,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             return new bootstrap.Toast(toastEl, { delay: 3000 });
         });
         toastList.forEach(toast => toast.show());
+
+         // ✅ Password visibility toggle
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';            
+        password.setAttribute('type', type);
+
+        // Toggle icon
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+        this.querySelector('i').classList.toggle('fa-eye');
+    });
     </script>
 </body>
 

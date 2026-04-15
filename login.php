@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </div>
         <?php endif; ?>
-        <form action="" method="post" class="form-control mt-5 p-4"
+        <form id="loginForm" action="" method="post" class="form-control mt-5 p-4"
             style="height:auto; width:380px; box-shadow: rgba(60, 64, 67, 0.3) 
             0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;">
             <div class="row">
@@ -115,14 +115,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                   class="form-control" required>
             </div>
             <div class="col mb-3 mt-3">
-                <label for="password"><i
-                  class="fa fa-lock"></i> Password</label>
-                <input type="password" name="password" id="password" 
-                  class="form-control" required>
+                <label for="password">
+                    <i class="fa fa-lock"></i> Password
+                    </label>
+
+                    <div class="input-group">
+                        <input type="password" name="password" id="password" 
+                        class="form-control" required>
+
+                        <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                            <i class="fa fa-eye-slash"></i>
+                            </span>
+                    </div>
             </div>
+
             <div class="col mb-3 mt-3">
-                <button type="submit" 
-                  class="btn btn-success bg-success" style="font-weight: 600;">Login</button>
+               <button type="submit" id="loginBtn"
+               class="btn btn-success bg-success d-flex align-items-center justify-content-center gap-2"
+               style="font-weight: 600;">
+               <span id="btnText">Login</span>
+               <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+            </button>
+
             </div>
             <p class="text-center"> <a href="reset_password.php"
                         style="text-decoration: none;font-weight: 600;  ">Forgot Password</a></p>
@@ -140,6 +154,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             return new bootstrap.Toast(toastEl, { delay: 3000 });
         });
         toastList.forEach(toast => toast.show());
+
+        // ✅ Password visibility toggle
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+
+        // Toggle icon
+        this.querySelector('i').classList.toggle('fa-eye-slash');
+        this.querySelector('i').classList.toggle('fa-eye');
+    });
+        // ✅ Login spinner logic
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+
+        loginForm.addEventListener('submit', function () {
+        // Disable button
+        loginBtn.disabled = true;
+
+        // Show spinner
+        spinner.classList.remove('d-none');
+
+        // Change text
+        btnText.textContent = 'Please wait...';
+    });
     </script>
 </body>
 
