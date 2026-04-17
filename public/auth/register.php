@@ -8,7 +8,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    //password strength validation 
+    if(
+        strlen($password) < 6 ||
+        !preg_match('/[A-Z]/', $password) ||
+        !preg_match('/[a-z]/', $password) ||
+        !preg_match('/[0-9]/', $password) ||
+        !preg_match('/[\W]/', $password)
+    ) {
+        $message = "Password must be at least 6 characters long and include uppercase, lowercase, number, and special character.";
+        $toastClass = "#dc3545"; // Danger color
+    } else {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);   
+    
 
     // Check if email already exists
     $checkEmailStmt = $conn->prepare("SELECT email FROM users WHERE email = ?");
@@ -35,7 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->close();
     }
 
+
     $checkEmailStmt->close();
+    }
     $conn->close();
 }
 ?>
@@ -95,8 +110,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                   class="form-control" required>
             </div>
             <div class="mb-2 mt-2">
-                <label for="password"><i 
-                  class="fa fa-lock"></i> Password</label>
+                <label for="password"><i class="fa fa-lock"></i>
+                 Password</label>
 
                 <div class="input-group">
                         <input type="password" name="password" id="password" 
@@ -106,6 +121,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fa fa-eye-slash"></i>
                             </span>
                     </div>
+                    <div class="progress mt-2" style="height: 5px;">
+                        <div id="passwordStrengthBar" class="progress-bar" role="progressbar"></div>
+                    </div>
+                    <small id="passwordStrengthText" class="form-text"></small>
             </div>
             <div class="mb-2 mt-3">
                 <button type="submit" 
@@ -121,6 +140,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
     </div>
     <script>
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+
+        passwordInput.addEventListener('input', function () {
+            const value = passwordInput.value;
+            let strength = 0;
+
+
+            // strength rules
+            if (value.length >= 6) strength++;
+            if (/[A-Z]/.test(value)) strength++;
+            if (/[a-z]/.test(value)) strength++;
+            if (/[0-9]/.test(value)) strength++;
+            if (/[\W]/.test(value)) strength++;
+
+            // Update UI
+            switch (strength) {
+                case 0:
+                case 1:
+            strengthBar.style.width = '20%';
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.innerText = 'Weak password';
+            break;
+        case 2:
+            strengthBar.style.width = '40%';
+            strengthBar.className = 'progress-bar bg-warning';
+            strengthText.innerText = 'Fair password';
+            break;
+        case 3:
+            strengthBar.style.width = '60%';
+            strengthBar.className = 'progress-bar bg-info';
+            strengthText.innerText = 'Good password';
+            break;
+        case 4:
+            strengthBar.style.width = '80%';
+            strengthBar.className = 'progress-bar bg-primary';
+            strengthText.innerText = 'Strong password';
+            break;
+        case 5:
+            strengthBar.style.width = '100%';
+            strengthBar.className = 'progress-bar bg-success';
+            strengthText.innerText = 'Very strong password';
+            break;
+    }
+});
+
         let toastElList = [].slice.call(document.querySelectorAll('.toast'))
         let toastList = toastElList.map(function (toastEl) {
             return new bootstrap.Toast(toastEl, { delay: 3000 });

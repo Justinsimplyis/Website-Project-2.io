@@ -1,10 +1,14 @@
 <?php
 session_start();
-include 'db_connection.php';
+include 'C:/Users/User/Documents/GitHub/Website-Project-2/database/db_connection.php';
+
+
+//header to return json
+header('Content-Type: application/json');
 
 // 1. Authentication Check
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: C:/Users/User/Documents/GitHub/Website-Project-2/public/auth/login.php");
     exit();
 }
 
@@ -17,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
 
     // Prevent a user from following themselves.
     if ($follower_id === $followed_id) {
-        header("Location: profile_view.php?id=" . $followed_id);
+        header("Location: /api/profile_view.php?id=" . $followed_id);
         exit();
     }
 
@@ -35,9 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
             $sql = "INSERT INTO followers (follower_id, followed_id) VALUES (?, ?)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $follower_id, $followed_id);
-            $stmt->execute();
 
-
+            if(!$stmt->execute()) {
+                echo json_encode(['status' => 'error', 'message' => 'followed']); 
+            }else{
+                echo json_encode(['status' => 'success', 'message' => 'error']);
+            }
+        }else{
+            echo json_encode(['status' => 'error', 'message' => 'already following']);
         }
     } 
     
@@ -47,17 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         $sql = "DELETE FROM followers WHERE follower_id = ? AND followed_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ii", $follower_id, $followed_id);
-        $stmt->execute();        
+
+
+        if($stmt->execute()){
+            echo json_encode(['status' => 'success', 'message' => 'unfollowed']);
+        }else{
+            echo json_encode(['status' => 'error', 'message' => 'error']);
+        }        
             
-    }
-    
-    // 5. Redirect Back to the profile page the user was viewing.
-    header("Location: profile_view.php?id=" . $followed_id);
-    exit();
+    }   
 
 } else {
-    // If not a valid POST request, redirect to the dashboard.
-    header("Location: dashboard.php");
-    exit();
+    // invalid requst
+    echo json_encode(['status' => 'error', 'message' => 'invalid request']);
+    
 }
 ?>

@@ -68,20 +68,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $relationship_status = $_POST['relationship_status'] ?? '';
     
     // Handle image upload
-    $profile_image = $profile_info['profile_image']; // Keep current image by default
-    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = 'uploads/profile_images/';
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
-        
-        $file_name = $user_id . '_' . time() . '_' . basename($_FILES['profile_image']['name']);
-        $upload_path = $upload_dir . $file_name;
-        
-        if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_path)) {
-            $profile_image = $upload_path;
-        }
+    // Handle image upload
+$profile_image = $profile_info['profile_image'];
+
+if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+
+    // ✅ FIX: Absolute project path
+    $project_root = 'C:/Users/User/Documents/GitHub/Website-Project-2/';
+    $upload_dir = $project_root . 'uploads/profile_images/';
+    $web_path = '/uploads/profile_images/';
+
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0755, true);
     }
+
+    $file_ext = strtolower(pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'gif'];
+
+    if (!in_array($file_ext, $allowed)) {
+        die("Invalid file type");
+    }
+
+    $file_name = $user_id . '_' . time() . '.' . $file_ext;
+
+    $server_path = $upload_dir . $file_name;
+
+    if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $server_path)) {
+
+        // delete old image
+        if (!empty($profile_image) && file_exists($project_root . ltrim($profile_image, '/'))) {
+            unlink($project_root . ltrim($profile_image, '/'));
+        }
+
+        // save web path
+        $profile_image = $web_path . $file_name;
+    }
+}
     
     // Check if profile exists
     $check_sql = "SELECT user_id FROM users_profile WHERE user_id = ?";
@@ -411,7 +433,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                          width="40" height="40" style="border-radius:50%; object-fit:cover;">
                                     <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                                 </div>
-                                <a href="profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>
+                                <a href="/api/profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>
                             </div>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -440,7 +462,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                                     <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                                 </div>
                                 <div class="d-flex gap-1">
-                                    <a href="profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>                                   
+                                    <a href="/api/profile_view.php?id=<?php echo $user['id']; ?>" class="btn btn-sm btn-primary">View</a>                                   
                                 </div>
                             </div>
                         <?php endforeach; ?>

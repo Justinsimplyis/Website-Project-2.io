@@ -28,46 +28,218 @@ if (empty($username)) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+        <!-- CSS -->
     <link rel="stylesheet" href="../css/dashboard.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
     <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/295/295128.png">
+
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <style>
-        /* Existing Navbar Styles */
-        .search-container { position: relative; }
-        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 0 0 5px 5px; max-height: 300px; overflow-y: auto; z-index: 1000; display: none; }
-        .search-results.show { display: block; }
-        .notification-item { padding: 10px; border-bottom: 1px solid #eee; }
-        .notification-item:last-child { border-bottom: none; }
-        .notification-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+/* ============================================
+   Notification Styles
+   ============================================ */
 
-        /* NEW: Feed Styles (Matching your glassmorphism theme) */
-        body { background: #f8f9fa; }
-        .feed-container { max-width: 600px; margin: 30px auto; }
-        .create-post-box, .post-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .post-avatar {
-            width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #e9ecef;
-        }
-        .post-actions .btn-light {
-            background: #f8f9fa; border: none; color: #6c757d; font-weight: 500;
-        }
-        .post-actions .btn-light:hover { background: #e9ecef; color: #000; }
-        .post-actions .btn-light.active { color: #dc3545; }
-        .post-actions .btn-light.active i { font-weight: 900; }
-    </style>
+/* Dropdown Container */
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    width: 360px;
+    max-height: 480px;
+    overflow: hidden;
+    z-index: 1000;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.notification-dropdown.show {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.notification-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.notification-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Scrollable List */
+.notification-list {
+    overflow-y: auto;
+    flex: 1;
+    max-height: 360px;
+}
+
+/* Individual Notification */
+.notification-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background-color 0.2s ease;
+    cursor: default;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+/* Unread State */
+.notification-item.unread {
+    background-color: #e8f4fd;
+    border-left: 3px solid #0d6efd;
+}
+
+.notification-item.unread:hover {
+    background-color: #d6eaf8;
+}
+
+/* Avatar */
+.notification-avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+/* Text */
+.notification-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #333;
+}
+
+.notification-item.unread .notification-text {
+    font-weight: 500;
+}
+
+/* Footer */
+.notification-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.notification-footer .btn {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+/* Badge */
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 0 4px;
+    animation: badgePulse 2s infinite;
+}
+
+.notification-badge.show {
+    display: flex;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Bell Animation */
+.bell-shake {
+    animation: bellShake 0.5s ease;
+}
+
+@keyframes bellShake {
+    0% { transform: rotate(0); }
+    15% { transform: rotate(15deg); }
+    30% { transform: rotate(-15deg); }
+    45% { transform: rotate(10deg); }
+    60% { transform: rotate(-10deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0); }
+}
+
+/* Loading State */
+.notification-loading {
+    padding: 40px 16px;
+    text-align: center;
+    color: #999;
+}
+
+.notification-loading i {
+    font-size: 1.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Search (kept for context) */
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 5px 5px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-results.show {
+    display: block;
+}
+
+.search-results-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.search-results-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
 </head>
 <body>
     <nav class="navbar navbar-expand-sm navbar-light bg-success">
@@ -84,31 +256,39 @@ if (empty($username)) {
                     <a href="chat.php" class="btn btn-light my-2 my-sm-0" style="font-weight:bolder;color:purple;"><i class="fa fa-comments"></i></a>
 
                     <div class="search-container">
-                        <button class="btn btn-light" type="button" id="searchToggle"><i class="fa fa-search"></i></button>
-                        <div class="search-form" style="display: none; position: absolute; top: 40px; right: 0; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; z-index: 1000;">
-                            <form method="GET" id="searchForm">
-                                <div class="input-group">
-                                    <input type="text" name="search" class="form-control" placeholder="Search users..." id="searchInput">
-                                    <button class="btn btn-success" type="submit">Search</button>
-                                </div>
-                            </form>
-                            <div id="searchResults" class="search-results"></div>
-                        </div>
-                    </div>
-
-                    <div class="position-relative">
-                        <button class="btn btn-light position-relative" type="button" id="notificationsToggle">
-                            <i class="fa fa-bell"></i>
-                            <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
-                        </button>
-                        <div id="notificationsContainer" style="display: none; position: absolute; top: 40px; right: 0; background: white; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 300px; max-height: 400px; overflow-y: auto; z-index: 1000;">
-                            <div class="p-2 border-bottom d-flex justify-content-between">
-                                <h5 class="mb-0">Notifications</h5>
-                                <button id="markAllReadBtn" class="btn btn-sm btn-outline-secondary">Mark all read</button>
+                    <button class="btn btn-light" type="button" id="searchToggle">
+                        <i class="fa fa-search"></i>
+                    </button>
+                    <div class="search-form" style="display: none; position: absolute; top: 40px; right: 0; background: white; padding: 12px; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); width: 300px; z-index: 1000;">
+                        <form method="GET" id="searchForm">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Search users..." id="searchInput">
+                                <button class="btn btn-success" type="submit">Go</button>
                             </div>
-                            <div id="notificationsList"></div>
+                        </form>
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                </div>
+
+                    <!-- Notifications -->
+                <div class="position-relative">
+                    <button class="btn btn-light position-relative" type="button" id="notificationsToggle">
+                        <i class="fa fa-bell" id="bellIcon"></i>
+                        <span id="notificationBadge" class="notification-badge">0</span>
+                    </button>
+                    
+                    <div id="notificationsContainer" class="notification-dropdown">
+                        <div class="notification-header">
+                            <h5><i class="fa fa-bell"></i> Notifications</h5>
+                            <button class="btn btn-sm btn-link text-decoration-none p-0 mark-all-read-header" title="Mark all as read">
+                                <i class="fa fa-check-double"></i>
+                            </button>
+                        </div>
+                        <div id="notificationsList" class="notification-list">
+                            <!-- Notifications loaded here -->
                         </div>
                     </div>
+                </div>
                      
                     <a href="profile.php" class="btn btn-light my-2 my-sm-0" style="font-weight:bolder;color:orange;"><i class="fa fa-user-circle"></i></a>
 
@@ -134,159 +314,291 @@ if (empty($username)) {
         </div>
     </div>
 
-    <!-- FEED OR MAIN CONTENT AREA -->
-    <div class="container feed-container">
+    
+<script>
+ $(document).ready(function() {
+    
+    // ============================================
+    // Configuration
+    // ============================================
+    const NOTIFICATION_API = '/api/notifications.php';
+    const POLL_INTERVAL = 30000; // 30 seconds
+    
+    let notificationsLoaded = false;
+    let pollTimer = null;
+    
+    // ============================================
+    // Dropdown Toggle Logic
+    // ============================================
+    $('#searchToggle').on('click', function(e) {
+        e.stopPropagation();
+        closeAllDropdowns();
+        $('.search-form').toggle();
+        if ($('.search-form').is(':visible')) {
+            $('#searchInput').focus();
+        }
+    });
+    
+    $('#notificationsToggle').on('click', function(e) {
+        e.stopPropagation();
+        const $container = $('#notificationsContainer');
+        const wasOpen = $container.hasClass('show');
         
-        <!-- Create Post Section -->
-        <div class="create-post-box">
-            <form id="createPostForm" class="d-flex flex-column gap-2">
-                <textarea class="form-control border-0" id="postContent" rows="3" placeholder="What's on your mind, <?php echo htmlspecialchars($username); ?>?" required style="resize: none; box-shadow: none;"></textarea>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">Post to your followers</small>
-                    <button type="submit" class="btn btn-success btn-sm">
-                        <i class="fa fa-paper-plane"></i> Post
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Feed Actions -->
-        <div class="d-flex justify-content-end mb-3">
-            <button id="refreshFeedBtn" class="btn btn-outline-secondary btn-sm">
-                <i class="fa fa-refresh"></i> Refresh Feed
-            </button>
-        </div>
-
-        <!-- Content Container (Loaded via AJAX) -->
-        <div id="content-container">
-            <div class="text-center text-muted mt-5">
-                <div class="spinner-border text-success" role="status"></div>
-                <p class="mt-2">Loading feed...</p>
-            </div>
-        </div>
+        closeAllDropdowns();
         
-    </div>
-
-    <script>
-        $(document).ready(function(){
+        if (!wasOpen) {
+            $container.addClass('show');
             
-            // --- FEED LOGIC ---
-            
-            function loadFeed() {
-                $('#content-container').load('load_feed.php');
+            // Load notifications only on first open or force refresh
+            if (!notificationsLoaded) {
+                loadNotifications();
             }
-
-            // Create Post
-            $('#createPostForm').submit(function(e){
-                e.preventDefault();
-                let content = $('#postContent').val().trim();
-                if(!content) return;
-
-                let btn = $(this).find('button[type="submit"]');
-                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Posting...');
-
-                $.post('create_post.php', { content: content }, function(res){
-                    res = JSON.parse(res);
-                    if(res.success) {
-                        $('#postContent').val(''); // clear textarea
-                        $('#content-container').prepend(res.html); // add new post to top
-                    } else {
-                        alert(res.error || 'Failed to create post.');
-                    }
-                    btn.prop('disabled', false).html('<i class="fa fa-paper-plane"></i> Post');
-                });
-            });
-
-            // Like Post
-            $(document).on('click', '.like-btn', function(){
-                let btn = $(this);
-                let postCard = btn.closest('.post-card');
-                let post_id = postCard.data('post-id');
-                let countSpan = btn.find('span');
-                let heartIcon = btn.find('i');
-
-                $.post('like_handler.php', { post_id: post_id }, function(res){
-                    res = JSON.parse(res);
-                    if(res.success) {
-                        countSpan.text(res.new_count);
-                        if(res.action === 'liked') {
-                            btn.addClass('active');
-                            heartIcon.removeClass('fa-heart-o').addClass('fa-heart text-danger');
-                        } else {
-                            btn.removeClass('active');
-                            heartIcon.removeClass('fa-heart text-danger').addClass('fa-heart-o');
-                        }
-                    }
-                });
-            });
-
-            // Delete Post
-            $(document).on('click', '.delete-post-btn', function(){
-                if(!confirm('Are you sure you want to delete this post?')) return;
-                let postCard = $(this).closest('.post-card');
-                let post_id = postCard.data('post-id');
-
-                $.post('delete_post.php', { post_id: post_id }, function(res){
-                    res = JSON.parse(res);
-                    if(res.success) {
-                        postCard.fadeOut(300, function(){ $(this).remove(); });
-                    } else {
-                        alert(res.error || 'Failed to delete.');
-                    }
-                });
-            });
-
-            // Refresh Feed Button
-            $('#refreshFeedBtn').click(function(){
-                loadFeed();
-            });
-
-            // Initial Feed Load
-            loadFeed();
-
-
-            // --- EXISTING NAVBAR LOGIC (Tweaked for new mark-all button) ---
-            
-            $('#searchToggle').click(function(e){ e.stopPropagation(); $('.search-form').toggle(); $('#notificationsContainer').hide(); if($('.search-form').is(':visible')) { $('#searchInput').focus(); } });
-            $('#notificationsToggle').click(function(e){ e.stopPropagation(); $('#notificationsContainer').toggle(); $('.search-form').hide(); if($('#notificationsContainer').is(':visible')) { loadNotifications(); } });
-            $(document).click(function(){ $('.search-form').hide(); $('#notificationsContainer').hide(); });
-            $('.search-form, #notificationsContainer').click(function(e){ e.stopPropagation(); });
-            
-            $('#searchForm').submit(function(e){
-                e.preventDefault();
-                const searchTerm = $('#searchInput').val().trim();
-                if(searchTerm) { $.get('search.php', { search: searchTerm }, function(response) { $('#searchResults').html(response).addClass('show'); }); }
-            });
-            
-            function loadNotifications() { $.get('notifications.php', function(response) { $('#notificationsList').html(response); }); }
-            
-            // Mark all read button
-            $('#markAllReadBtn').click(function(){
-                $.post('notifications.php', { action: 'mark_all_read' }, function(){
-                    loadNotifications();
-                    $('#notificationBadge').hide();
-                });
-            });
-
-            // Mark single read
-            $(document).on('click', '.mark-read', function(e){
-                e.stopPropagation();
-                let notif_id = $(this).closest('.notification-item').data('notif-id');
-                $.post('notifications.php', { action: 'mark_read', notif_id: notif_id }, function(){
-                    $('[data-notif-id="'+notif_id+'"]').removeClass('unread');
-                    $('[data-notif-id="'+notif_id+'"]').find('.mark-read').remove();
-                    // update badge
-                    $.get('notifications.php', { count_only: true }, function(c){ if(c>0) $('#notificationBadge').text(c).show(); else $('#notificationBadge').hide(); });
-                });
-            });
-
-            // Chat Requests
-            $(document).on('click', '.acceptChat', function(){ let sender_id = $(this).data('sender-id'); $.post('notifications.php', { action: 'accept_chat', sender_id: sender_id }, function(res){ let d=JSON.parse(res); if(d.success) { alert('Accepted!'); loadNotifications(); window.location.href='chat.php?user_id='+sender_id; } }); });
-            $(document).on('click', '.rejectChat', function(){ let sender_id = $(this).data('sender-id'); $.post('notifications.php', { action: 'reject_chat', sender_id: sender_id }, function(res){ let d=JSON.parse(res); if(d.success) { loadNotifications(); } }); });
-            
-            // Load notification count on page load
-            $.get('notifications.php', { count_only: true }, function(response) { if(response > 0) { $('#notificationBadge').text(response).show(); } });
+        }
+    });
+    
+    // Close dropdowns on outside click
+    $(document).on('click', function() {
+        closeAllDropdowns();
+    });
+    
+    // Prevent closing when clicking inside
+    $('.search-form, #notificationsContainer').on('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    function closeAllDropdowns() {
+        $('.search-form').hide();
+        $('#notificationsContainer').removeClass('show');
+    }
+    
+    // ============================================
+    // Notification Functions
+    // ============================================
+    
+    function loadNotifications() {
+        const $list = $('#notificationsList');
+        
+        // Show loading state
+        $list.html('<div class="notification-loading"><i class="fa fa-spinner fa-spin"></i><p class="mt-2 mb-0">Loading...</p></div>');
+        
+        $.ajax({
+            url: NOTIFICATION_API,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $list.html(response.html);
+                    notificationsLoaded = true;
+                } else {
+                    $list.html('<div class="text-danger text-center p-3">Failed to load notifications</div>');
+                }
+            },
+            error: function() {
+                $list.html('<div class="text-danger text-center p-3">Error loading notifications</div>');
+            }
         });
-    </script>
+    }
+    
+    function updateNotificationBadge() {
+        $.ajax({
+            url: NOTIFICATION_API,
+            type: 'GET',
+            data: { action: 'count' },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const count = response.count;
+                    const $badge = $('#notificationBadge');
+                    
+                    if (count > 0) {
+                        $badge.text(count > 99 ? '99+' : count).addClass('show');
+                        
+                        // Shake bell if count increased
+                        if (!$badge.data('last-count') || count > $badge.data('last-count')) {
+                            $('#bellIcon').addClass('bell-shake');
+                            setTimeout(() => $('#bellIcon').removeClass('bell-shake'), 500);
+                        }
+                        $badge.data('last-count', count);
+                    } else {
+                        $badge.removeClass('show').data('last-count', 0);
+                    }
+                }
+            }
+        });
+    }
+    
+    function markAsRead(notifId) {
+        $.ajax({
+            url: NOTIFICATION_API,
+            type: 'POST',
+            data: { action: 'mark_read', notif_id: notifId },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Remove unread styling
+                    $(`.notification-item[data-notif-id="${notifId}"]`)
+                        .removeClass('unread')
+                        .find('.mark-read').fadeOut(200, function() { $(this).remove(); });
+                    
+                    updateNotificationBadge();
+                }
+            }
+        });
+    }
+    
+    function markAllAsRead() {
+        $.ajax({
+            url: NOTIFICATION_API,
+            type: 'POST',
+            data: { action: 'mark_all_read' },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    // Remove all unread styling
+                    $('.notification-item.unread').removeClass('unread');
+                    $('.mark-read').fadeOut(200, function() { $(this).remove(); });
+                    
+                    updateNotificationBadge();
+                }
+            }
+        });
+    }
+    
+    // ============================================
+    // Event Delegation for Notification Actions
+    // ============================================
+    
+    // Mark single notification as read
+    $('#notificationsList').on('click', '.mark-read', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const $item = $(this).closest('.notification-item');
+        const notifId = $item.data('notif-id');
+        
+        if (notifId) {
+            markAsRead(notifId);
+        }
+    });
+    
+    // Mark all as read (footer button)
+    $('#notificationsList').on('click', '.mark-all-read', function(e) {
+        e.preventDefault();
+        markAllAsRead();
+    });
+    
+    // Mark all as read (header button)
+    $('.mark-all-read-header').on('click', function(e) {
+        e.preventDefault();
+        markAllAsRead();
+    });
+    
+    // View profile action
+    $('#notificationsList').on('click', '.view-profile', function(e) {
+        e.preventDefault();
+        const userId = $(this).data('user-id');
+        if (userId) {
+            window.location.href = `/public/profile.php?user_id=${userId}`;
+        }
+    });
+    
+    // Open chat action
+    $('#notificationsList').on('click', '.open-chat', function(e) {
+        e.preventDefault();
+        const userId = $(this).data('user-id');
+        if (userId) {
+            window.location.href = `/public/chat.php?user_id=${userId}`;
+        }
+    });
+    
+    // View post action
+    $('#notificationsList').on('click', '.view-post', function(e) {
+        e.preventDefault();
+        const postId = $(this).data('post-id');
+        if (postId) {
+            window.location.href = `/public/post.php?post_id=${postId}`;
+        }
+    });
+    
+    // ============================================
+    // Search Functionality
+    // ============================================
+    
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        const searchTerm = $('#searchInput').val().trim();
+        
+        if (searchTerm.length < 2) {
+            $('#searchResults').html('<div class="p-2 text-muted small">Enter at least 2 characters</div>').addClass('show');
+            return;
+        }
+        
+        $.ajax({
+            url: '/api/search.php',
+            type: 'GET',
+            data: { search: searchTerm },
+            success: function(response) {
+                $('#searchResults').html(response).addClass('show');
+            },
+            error: function() {
+                $('#searchResults').html('<div class="p-2 text-danger">Error loading results</div>').addClass('show');
+            }
+        });
+    });
+    
+    // Live search with debounce
+    let searchTimeout;
+    $('#searchInput').on('keyup', function() {
+        clearTimeout(searchTimeout);
+        const term = $(this).val().trim();
+        
+        if (term.length < 2) {
+            $('#searchResults').removeClass('show');
+            return;
+        }
+        
+        searchTimeout = setTimeout(function() {
+            $.ajax({
+                url: '/api/search.php',
+                type: 'GET',
+                data: { search: term },
+                success: function(response) {
+                    $('#searchResults').html(response).addClass('show');
+                }
+            });
+        }, 300);
+    });
+    
+    // ============================================
+    // Initial Load & Polling
+    // ============================================
+    
+    // Get initial count
+    updateNotificationBadge();
+    
+    // Start polling for new notifications
+    function startPolling() {
+        pollTimer = setInterval(updateNotificationBadge, POLL_INTERVAL);
+    }
+    
+    // Pause polling when tab is not visible
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            clearInterval(pollTimer);
+        } else {
+            updateNotificationBadge();
+            startPolling();
+            // Refresh notification list if dropdown was open
+            if ($('#notificationsContainer').hasClass('show')) {
+                notificationsLoaded = false;
+                loadNotifications();
+            }
+        }
+    });
+    
+    startPolling();
+    
+});
+</script>
 </body>
 </html>
