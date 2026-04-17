@@ -40,13 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("ii", $follower_id, $followed_id);
 
-            if(!$stmt->execute()) {
-                echo json_encode(['status' => 'error', 'message' => 'followed']); 
-            }else{
-                echo json_encode(['status' => 'success', 'message' => 'error']);
+            if ($stmt->execute()) {
+                echo json_encode(['status' => 'success', 'action' => 'followed']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to follow']);
             }
-        }else{
-            echo json_encode(['status' => 'error', 'message' => 'already following']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Already following']);
         }
     } 
     
@@ -58,17 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
         $stmt->bind_param("ii", $follower_id, $followed_id);
 
 
-        if($stmt->execute()){
-            echo json_encode(['status' => 'success', 'message' => 'unfollowed']);
-        }else{
-            echo json_encode(['status' => 'error', 'message' => 'error']);
-        }        
-            
-    }   
+       if ($stmt->execute()) {
+            // ✅ FIXED: Return 'action' key with 'unfollowed' value
+            echo json_encode(['status' => 'success', 'action' => 'unfollowed']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Failed to unfollow']);
+        }
+    }
 
 } else {
-    // invalid requst
-    echo json_encode(['status' => 'error', 'message' => 'invalid request']);
-    
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
 }
 ?>

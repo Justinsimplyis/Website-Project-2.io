@@ -175,7 +175,7 @@ function renderNotifications($notifications) {
     $html .= '<button class="btn btn-sm btn-outline-secondary mark-all-read">
                 <i class="fa fa-check-double"></i> Mark All Read
               </button>';
-    $html .= '<a href="notifications_all.php" class="btn btn-sm btn-outline-primary">
+    $html .= '<a href="/api/models/notifications_all.php" class="btn btn-sm btn-outline-primary">
                 View All
               </a>';
     $html .= '</div>';

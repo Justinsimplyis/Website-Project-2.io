@@ -515,7 +515,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         e.preventDefault();
         const userId = $(this).data('user-id');
         if (userId) {
-            window.location.href = `/api/profile_view.php?id=<?php echo $user['id']; ?>`;
+             window.location.href = `/api/profile_view.php?id=${userId}`;
         }
     });
     
